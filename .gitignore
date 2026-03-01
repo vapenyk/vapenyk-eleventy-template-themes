@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Bun
+bun.lock
+
+# Generated output
+# dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+*.swp
+*.swo
+*~
+.idea/
+.vscode/

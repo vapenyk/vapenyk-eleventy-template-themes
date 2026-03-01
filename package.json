@@ -1,0 +1,13 @@
+{
+    "name": "vapenyk-eleventy-template-themes",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "generate": "bun run generate.ts",
+        "test": "bun test"
+    },
+    "devDependencies": {
+        "@types/bun": "^1.3.9"
+    }
+}
