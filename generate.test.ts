@@ -10,8 +10,6 @@
 import { describe, test, expect } from "bun:test";
 import {
     parseHex,
-    relativeLuminance,
-    contrastRatio,
     hexToHsl,
     normalizeColor,
     determineVariant,
@@ -51,54 +49,6 @@ describe("parseHex", () => {
     });
 });
 
-// =============================================================================
-// Color math — WCAG 2.1 relative luminance
-// =============================================================================
-
-describe("relativeLuminance", () => {
-    test("black has luminance ≈ 0", () => {
-        expect(relativeLuminance("#000000")).toBeCloseTo(0, 4);
-    });
-
-    test("white has luminance ≈ 1", () => {
-        expect(relativeLuminance("#ffffff")).toBeCloseTo(1, 4);
-    });
-
-    test("pure red has known luminance", () => {
-        // sRGB relative luminance of #ff0000 = 0.2126
-        expect(relativeLuminance("#ff0000")).toBeCloseTo(0.2126, 3);
-    });
-
-    test("mid-gray has intermediate luminance", () => {
-        const lum = relativeLuminance("#808080");
-        expect(lum).toBeGreaterThan(0.1);
-        expect(lum).toBeLessThan(0.5);
-    });
-});
-
-// =============================================================================
-// Color math — WCAG 2.1 contrast ratio
-// =============================================================================
-
-describe("contrastRatio", () => {
-    test("black vs white = 21:1", () => {
-        expect(contrastRatio("#000000", "#ffffff")).toBeCloseTo(21, 0);
-    });
-
-    test("same color = 1:1", () => {
-        expect(contrastRatio("#abcdef", "#abcdef")).toBeCloseTo(1, 4);
-    });
-
-    test("is symmetric", () => {
-        const ab = contrastRatio("#1a1a2e", "#e0e0e0");
-        const ba = contrastRatio("#e0e0e0", "#1a1a2e");
-        expect(ab).toBeCloseTo(ba, 4);
-    });
-
-    test("is always ≥ 1", () => {
-        expect(contrastRatio("#333333", "#444444")).toBeGreaterThanOrEqual(1);
-    });
-});
 
 // =============================================================================
 // Color math — hex to HSL conversion
@@ -174,21 +124,13 @@ describe("determineVariant", () => {
     const base = { name: "test", author: "test", palette: {} };
 
     test("uses YAML variant field when present", () => {
-        expect(determineVariant({ ...base, variant: "dark" }, "#000", "#fff")).toBe("dark");
-        expect(determineVariant({ ...base, variant: "Light" }, "#000", "#fff")).toBe("light");
+        expect(determineVariant({ ...base, variant: "dark" })).toBe("dark");
+        expect(determineVariant({ ...base, variant: "Light" })).toBe("light");
     });
 
-    test("falls back to luminance when variant is missing", () => {
-        // Dark background, light foreground → dark
-        expect(determineVariant(base, "#1a1a2e", "#e0e0e0")).toBe("dark");
-        // Light background, dark foreground → light
-        expect(determineVariant(base, "#f0f0f0", "#1a1a2e")).toBe("light");
-    });
-
-    test("ignores invalid variant values", () => {
-        // "blue" is not dark/light, should fall back to luminance
-        const result = determineVariant({ ...base, variant: "blue" }, "#1a1a2e", "#e0e0e0");
-        expect(result).toBe("dark");
+    test("falls back to dark when variant is missing or invalid", () => {
+        expect(determineVariant(base)).toBe("dark");
+        expect(determineVariant({ ...base, variant: "blue" })).toBe("dark");
     });
 });
 
@@ -262,36 +204,7 @@ describe("generateCss", () => {
         expect(css).toContain("--base0D: #5dade2;");
     });
 
-    test("contains HSL decomposition", () => {
-        const css = generateCss(scheme, "dark", "base16");
-        expect(css).toContain("--base00-h:");
-        expect(css).toContain("--base00-s:");
-        expect(css).toContain("--base00-l:");
-    });
 
-    test("contains semantic tokens", () => {
-        const css = generateCss(scheme, "dark", "base16");
-        expect(css).toContain("--color-bg:");
-        expect(css).toContain("--color-text:");
-        expect(css).toContain("--color-link:");
-        expect(css).toContain("--color-error:");
-    });
-
-    test("dark variant uses dark shadow values", () => {
-        const css = generateCss(scheme, "dark", "base16");
-        expect(css).toContain("--shadow-color:          0deg 0% 0%;");
-    });
-
-    test("light variant uses light shadow values", () => {
-        const css = generateCss(scheme, "light", "base16");
-        expect(css).toContain("--shadow-color:          0deg 0% 50%;");
-    });
-
-    test("contains radii and transitions", () => {
-        const css = generateCss(scheme, "dark", "base16");
-        expect(css).toContain("--radius-md:");
-        expect(css).toContain("--transition-fast:");
-    });
 
     test("ends with closing brace", () => {
         const css = generateCss(scheme, "dark", "base16");

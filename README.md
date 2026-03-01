@@ -2,7 +2,7 @@
 
 Pre-built CSS theme files for [Eleventy](https://www.11ty.dev/) templates, generated from [tinted-theming/schemes](https://github.com/tinted-theming/schemes).
 
-Each theme provides a complete set of CSS custom properties — palette colors, semantic design tokens, HSL decomposition, shadows, radii, and transitions — ready to drop into any Eleventy project.
+Each theme provides a complete set of CSS custom properties for palette colors, ready to drop into any Eleventy project, backing a centralized theme setup.
 
 ## Structure
 
@@ -23,7 +23,6 @@ Each theme provides a complete set of CSS custom properties — palette colors, 
         └── light/
 ```
 
-> Themes that fail WCAG 2.1 contrast validation are automatically rejected during generation.
 
 ## Quick Start
 
@@ -50,25 +49,23 @@ Browse `dist/` and choose a CSS file, for example `dist/base16/dark/dracula.css`
 ### 3. Use the variables
 
 ```css
+/* Example mapping of base16 palette to semantic elements */
 body {
-  background: var(--color-bg);
-  color: var(--color-text);
+  background: var(--base00); /* Default Background */
+  color: var(--base05);      /* Default Foreground/Text */
 }
 
 a {
-  color: var(--color-link);
-  transition: color var(--transition-fast);
+  color: var(--base0D);      /* Functions, Methods, Attribute IDs, Headings, Links */
 }
 
 a:hover {
-  color: var(--color-link-hover);
+  color: var(--base0C);      /* Support, Regular Expressions, Escape Characters, Markup Quotes */
 }
 
 .card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
+  background: var(--base01); /* Lighter Background (Used for status bars, line number and folding marks) */
+  border: 1px solid var(--base02); /* Selection Background */
 }
 ```
 
@@ -79,30 +76,20 @@ Each generated theme provides the following custom properties:
 | Category | Variables |
 |----------|-----------|
 | **Palette** | `--base00` … `--base0F` (base16), `--base10` … `--base17` (base24) |
-| **HSL** | `--base00-h/s/l`, `--base05-h/s/l`, `--base08-h/s/l`, `--base0B-h/s/l`, `--base0D-h/s/l`, `--base0E-h/s/l` |
-| **Backgrounds** | `--color-bg`, `--color-bg-alt`, `--color-surface`, `--color-surface-hover`, `--color-surface-active` |
-| **Typography** | `--color-text`, `--color-text-strong`, `--color-text-muted`, `--color-text-subtle`, `--color-heading` |
-| **Accents** | `--color-accent`, `--color-accent-hover`, `--color-link`, `--color-link-hover`, `--color-link-visited` |
-| **Status** | `--color-success`, `--color-warning`, `--color-error`, `--color-info` |
-| **Borders** | `--color-border`, `--color-border-strong`, `--color-divider` |
-| **Code** | `--color-code-bg`, `--color-code-text`, `--color-code-keyword`, `--color-code-string`, `--color-code-comment`, `--color-code-function`, `--color-code-variable`, `--color-code-constant`, `--color-code-tag`, `--color-code-attribute` |
-| **Shadows** | `--shadow-sm`, `--shadow-md`, `--shadow-lg` |
-| **Radii** | `--radius-sm` (4px), `--radius-md` (8px), `--radius-lg` (16px), `--radius-xl` (24px), `--radius-full` |
-| **Transitions** | `--transition-fast` (150ms), `--transition-normal` (250ms), `--transition-slow` (400ms) |
 
 ## How It Works
 
 ```
 schemes/base16/*.yaml ──┐
-                        ├──▶ parse YAML ──▶ validate WCAG ──▶ generate CSS ──▶ dist/
+                        ├──▶ parse YAML ──▶ validate ──▶ generate CSS ──▶ dist/
 schemes/base24/*.yaml ──┘
 ```
 
 1. **Discover** — scan `schemes/` for subdirectories with `.yaml` files
 2. **Parse** — deserialize each YAML file (`Bun.YAML`)
-3. **Validate** — check palette keys + WCAG 2.1 contrast ratios
+3. **Validate** — check palette keys
 4. **Classify** — `variant` (dark/light) from YAML, `system` from YAML or directory
-5. **Generate** — CSS with palette, HSL, semantic tokens, shadows, radii, transitions
+5. **Generate** — CSS with palette variables
 6. **Write** — `dist/{system}/{variant}/{slug}.css` via `Bun.write()`
 
 ## Tech Stack
@@ -118,7 +105,7 @@ schemes/base24/*.yaml ──┘
 bun test
 ```
 
-Unit tests cover all pure functions: color math (hex parsing, WCAG 2.1 luminance/contrast, HSL conversion), color normalization, theme classification (variant/system), and CSS generation.
+Unit tests cover all pure functions: color math (hex parsing), color normalization, theme classification (variant/system), and CSS generation.
 
 ## Credits
 
